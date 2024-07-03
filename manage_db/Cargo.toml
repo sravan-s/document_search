@@ -1,10 +1,13 @@
 [package]
-name = "create_db"
+name = "manage_db"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
 dotenvy = "0.15.7"
+pdf-extract = "0.7.7"
 postgres = "0.19.7"
+rustyline = "14.0.0"
 sqlite = "0.36.0"
+regex = "1"

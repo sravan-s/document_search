@@ -2,6 +2,6 @@
 
 resolver = "2"
 members = [
-    "create_db",
+    "manage_db",
     "law_search"
 ]

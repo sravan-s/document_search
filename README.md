@@ -4,6 +4,13 @@ https://www.mha.gov.in/sites/default/files/250883_english_01042024.pdf
 
 Step #1
 Feed the law document to database
+> note
+> This PDF is unstrcutured and quite hard to parse so the following step is idiosyncratic
+> Prepare data
+> * Download the PDF
+> * Convert it into text -> https://www.xpdfreader.com/pdftotext-man.html -> `laws.txt`
+> * Move text file to `./data`
+
 PDF to Structured Data (id, summary, illustration, side_node)
 You need to do some manual work, because data in PDF is unstrctured
 
