@@ -1,16 +1,12 @@
+mod prompt;
+
 use anyhow::{Context, Result};
 use dotenvy::dotenv;
+use prompt::parse_input;
 use postgres::{Client, NoTls};
 use regex::Regex;
 use std::{env, fs::read_to_string};
 
-// fn show_prompt() -> String {
-//     let prompt = "
-//     Press: i: ignore, s.<section_id>: start new section, c.<chapter_id>: sets chapter
-//     u: summary, l:illustrations, d: side_bar, enter: add to current buffer
-//     ";
-//     prompt.to_string()
-// }
 
 fn cleanup_chapter(text: &str) -> String {
     let footer_pattern: &str = r#"(?m).*GAZETTE OF INDIA EXTRAORDINARY$|(?m)^.*_{5,}\s*$"#;
@@ -132,22 +128,21 @@ fn main() -> Result<()> {
         println!("Continuing to move from chapter: {work_done} to database");
     }
     
-    // to do - buffer work
-    // let mut lines = txt.lines();
-    // for line in lines {
-    //     let mut rl = rustyline::DefaultEditor::new()?;
-    //     let prompt = show_prompt();
-    //     let readline = rl.readline(&prompt);
-    //     match readline {
-    //         Ok(line) => {
-    //             if line.chars().next().is_none() {
-    //                 exit(0);
-    //             }
-    //         }
-    //         Err(_) => println!("No input"),
-    //     }
-    // }
-    // let out = pdf_extract::extract_text_from_mem(&bytes).unwrap();
+    let chapters_to_move = client
+        .query("SELECT * from chapters_to_move", &[])
+        .context("Couldnt select chapter from chapters_to_move table")
+        .unwrap();
+
+    for chapter in chapters_to_move {
+        let chapter_text: String = chapter.get(1);
+        let lines: Vec<String> = chapter_text.lines().map(|line| line.to_string()).collect();
+        let buffers = parse_input(lines);
+        print!("{:?}", buffers);
+        // let _ = client
+        //     .execute("INSERT INTO moved_chapters (chapter) values ($1)", &[&buffer.chapter])
+        //     .context("Coundt insert chapter into moved_chapters table")
+        //     .unwrap();
+    }
     println!("outing");
 
     Ok(())
