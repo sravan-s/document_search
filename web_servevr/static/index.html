@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search</title>
+  <script>
+    function search() {
+      let input = document.getElementById('input').value;
+      // show loading
+      document.styleSheets[0].insertRule(`
+        #result::before {
+          content: "Loading...";
+          position: absolute;
+          color: red;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      `);
+
+      fetch(`/search`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({input: input})
+      })
+        .then(response => response.json())
+        .then(data => {
+          let results = document.getElementById("result");
+          // wrapper
+          let result_box = document.createElement("div");
+          // question
+          let q = document.createElement("p");
+          q.innerHTML = `Query: ${input}`;
+          result_box.appendChild(q);
+          // answers
+          data.results.forEach((item) => {
+            let p = document.createElement("p");
+            p.innerHTML = item;
+            result_box.appendChild(p);
+          });
+          results.prepend(result_box);
+        })
+        .finally(() => {
+          document.getElementById('input').value = '';
+          document.styleSheets[0].deleteRule(0);
+        });
+    }
+  </script>
+  <style>
+    #result {
+      margin-top: 20px;
+      border: 1px solid black;
+      padding: 10px;
+      overflow-y: scroll;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    search for a law
+    <textarea id="input"></textarea>
+    <button onclick="search()">search</button>
+  </div>
+  <div id="result">
+  </div>
+</body>
+</html>

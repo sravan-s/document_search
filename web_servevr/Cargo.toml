@@ -1,0 +1,11 @@
+[package]
+name = "web_servevr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+fastembed = "3.7.0"
+qdrant-client = "1.10.1"
+rocket = { version = "0.5.1", features = ["json"] }
+serde = "1.0.203"
