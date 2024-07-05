@@ -26,6 +26,7 @@ struct SearchResponse {
 async fn search_qdrant(request: Json<SearchRequest>) -> Result<Json<SearchResponse>, std::io::Error>  {
     let input = request.input.clone();
 
+    // benchmark -> create new model for each request or use a global model
     let model = TextEmbedding::try_new(InitOptions {
         model_name: fastembed::EmbeddingModel::BGELargeENV15,
         show_download_progress: true,
@@ -39,6 +40,7 @@ async fn search_qdrant(request: Json<SearchRequest>) -> Result<Json<SearchRespon
         .context("Failed to embedd query")
         .unwrap();
 
+    // benchmark -> create new client for each request or use a global client
     let qdrant_client = Qdrant::from_url("http://localhost:6334")
         .build()
         .context("Failed to create qdrant client")
