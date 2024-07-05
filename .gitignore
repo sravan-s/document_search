@@ -1,4 +1,5 @@
 target/
 .env
 data/
-
+qdrant_data/
+.fastembed_cache

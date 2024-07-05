@@ -2,11 +2,10 @@ mod prompt;
 
 use anyhow::{Context, Result};
 use dotenvy::dotenv;
-use prompt::parse_input;
+use prompt::{parse_input, persist_buffers};
 use postgres::{Client, NoTls};
 use regex::Regex;
 use std::{env, fs::read_to_string};
-
 
 fn cleanup_chapter(text: &str) -> String {
     let footer_pattern: &str = r#"(?m).*GAZETTE OF INDIA EXTRAORDINARY$|(?m)^.*_{5,}\s*$"#;
@@ -98,9 +97,10 @@ fn main() -> Result<()> {
         .unwrap();
 
     let chapters_in_db = client
-        .execute("SELECT count(*) from chapters_to_move", &[])
+        .query_one("SELECT count(*) as chapters_in_db from chapters_to_move", &[])
         .context("Couldnt select chapter from chapters_to_move table")
         .unwrap();
+    let chapters_in_db: i64 = chapters_in_db.get("chapters_in_db");
 
     if chapters_in_db == 0 {
         println!("Adding chapters to database");
@@ -116,11 +116,11 @@ fn main() -> Result<()> {
         println!("Added chapters to database");
     }
     
-    let _result: Vec<String> = Vec::new();
     let work_done = client
-        .execute("SELECT count (*) chapter from moved_chapters", &[])
+        .query_one("SELECT count (*) AS chapter_count from moved_chapters", &[])
         .context("Couldnt select chapter from moved_chapters table")
         .unwrap();
+    let work_done: i64 = work_done.get("chapter_count");
 
     if work_done == 0 {
         println!("Starting to move chapters to database from chapter: one");
@@ -137,11 +137,9 @@ fn main() -> Result<()> {
         let chapter_text: String = chapter.get(1);
         let lines: Vec<String> = chapter_text.lines().map(|line| line.to_string()).collect();
         let buffers = parse_input(lines);
-        print!("{:?}", buffers);
-        // let _ = client
-        //     .execute("INSERT INTO moved_chapters (chapter) values ($1)", &[&buffer.chapter])
-        //     .context("Coundt insert chapter into moved_chapters table")
-        //     .unwrap();
+        let chapter_id: i32 = chapter.get(0);
+        persist_buffers(buffers, &mut client, chapter_id);
+        println!("Moved chapter: {}", chapter_id);
     }
     println!("outing");
 
