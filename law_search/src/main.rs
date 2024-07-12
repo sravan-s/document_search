@@ -2,6 +2,7 @@ use std::fs;
 
 use anyhow::Context;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
+use ort::ROCmExecutionProvider;
 use qdrant_client::{
     qdrant::{CreateCollectionBuilder, Distance, PointStruct, UpsertPointsBuilder, VectorParamsBuilder},
     Payload, Qdrant,
@@ -14,6 +15,9 @@ async fn main() {
     let model = TextEmbedding::try_new(InitOptions {
         model_name: EmbeddingModel::BGELargeENV15,
         show_download_progress: true,
+        execution_providers: vec![
+            ROCmExecutionProvider::default().with_device_id(0).build(),
+        ],
         // todo -> set diamension to 1024
         ..Default::default()
     })
